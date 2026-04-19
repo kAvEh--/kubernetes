@@ -263,12 +263,12 @@ func (c *Controller) processNextWorkItem(ctx context.Context) bool {
 	defer c.queue.Done(cKey)
 
 	err := c.syncEndpoints(ctx, cKey)
-	c.handleErr(klog.FromContext(ctx), err, cKey)
+	c.handleErr(ctx, klog.FromContext(ctx), err, cKey)
 
 	return true
 }
 
-func (c *Controller) handleErr(logger klog.Logger, err error, key string) {
+func (c *Controller) handleErr(ctx context.Context, logger klog.Logger, err error, key string) {
 	if err == nil {
 		c.queue.Forget(key)
 		return
@@ -282,7 +282,7 @@ func (c *Controller) handleErr(logger klog.Logger, err error, key string) {
 
 	logger.Info("Retry budget exceeded, dropping Endpoints out of the queue", "key", key, "err", err)
 	c.queue.Forget(key)
-	utilruntime.HandleError(err)
+	utilruntime.HandleErrorWithContext(ctx, err, "Retry budget exceeded, dropping Endpoints out of the queue", "key", key)
 }
 
 func (c *Controller) syncEndpoints(ctx context.Context, key string) error {
