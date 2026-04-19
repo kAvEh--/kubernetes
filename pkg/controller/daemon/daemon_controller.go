@@ -408,7 +408,7 @@ func (dsc *DaemonSetsController) processNextWorkItem(ctx context.Context) bool {
 		return true
 	}
 
-	utilruntime.HandleError(fmt.Errorf("%v failed with : %v", dsKey, err))
+	utilruntime.HandleErrorWithContext(ctx, fmt.Errorf("%v failed with : %v", dsKey, err), "sync daemon set error", "key", dsKey)
 	dsc.queue.AddRateLimited(dsKey)
 
 	return true
