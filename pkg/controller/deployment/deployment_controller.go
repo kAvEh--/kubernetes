@@ -528,7 +528,7 @@ func (dc *DeploymentController) handleErr(ctx context.Context, err error, key st
 		return
 	}
 
-	utilruntime.HandleError(err)
+	utilruntime.HandleErrorWithContext(ctx, err, "sync deployment error", "key", key)
 	logger.V(2).Info("Dropping deployment out of the queue", "deployment", klog.KRef(ns, name), "err", err)
 	dc.queue.Forget(key)
 }
