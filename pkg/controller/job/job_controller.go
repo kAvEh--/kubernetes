@@ -746,7 +746,7 @@ func (jm *Controller) processNextWorkItem(ctx context.Context) bool {
 		return true
 	}
 
-	utilruntime.HandleError(fmt.Errorf("syncing job: %w", err))
+	utilruntime.HandleErrorWithContext(ctx, fmt.Errorf("syncing job: %w", err), "syncing job error", "key", key)
 	jm.queue.AddRateLimited(key)
 
 	return true
@@ -765,7 +765,7 @@ func (jm *Controller) processNextOrphanPod(ctx context.Context) bool {
 	defer jm.orphanQueue.Done(key)
 	err := jm.syncOrphanPod(ctx, key)
 	if err != nil {
-		utilruntime.HandleError(fmt.Errorf("Error syncing orphan pod: %v", err))
+		utilruntime.HandleErrorWithContext(ctx, fmt.Errorf("error syncing orphan pod: %v", err), "syncing orphan pod error", "key", key)
 		jm.orphanQueue.AddRateLimited(key)
 	} else {
 		jm.orphanQueue.Forget(key)
