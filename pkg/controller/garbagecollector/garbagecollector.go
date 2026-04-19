@@ -236,7 +236,7 @@ func (gc *GarbageCollector) Sync(ctx context.Context, discoveryClient discovery.
 		// case, the restMapper will fail to map some of newResources until the next
 		// attempt.
 		if err := gc.resyncMonitors(logger, newResources); err != nil {
-			utilruntime.HandleError(fmt.Errorf("failed to sync resource monitors: %w", err))
+			utilruntime.HandleErrorWithContext(ctx, fmt.Errorf("failed to sync resource monitors: %w", err), "resync monitors error")
 			metrics.GarbageCollectorResourcesSyncError.Inc()
 			return
 		}
