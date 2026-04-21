@@ -216,12 +216,12 @@ func (dc *DeploymentController) deleteDeployment(logger klog.Logger, obj interfa
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleError(fmt.Errorf("couldn't get object from tombstone %#v", obj))
+			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get object from tombstone %#v", obj), "couldn't get object from tombstone", "obj", obj)
 			return
 		}
 		d, ok = tombstone.Obj.(*apps.Deployment)
 		if !ok {
-			utilruntime.HandleError(fmt.Errorf("tombstone contained object that is not a Deployment %#v", obj))
+			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("tombstone contained object that is not a Deployment %#v", obj), "tombstone contained object that is not a Deployment", "obj", obj)
 			return
 		}
 	}
@@ -343,12 +343,12 @@ func (dc *DeploymentController) deleteReplicaSet(logger klog.Logger, obj interfa
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleError(fmt.Errorf("couldn't get object from tombstone %#v", obj))
+			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get object from tombstone %#v", obj), "couldn't get object from tombstone", "obj", obj)
 			return
 		}
 		rs, ok = tombstone.Obj.(*apps.ReplicaSet)
 		if !ok {
-			utilruntime.HandleError(fmt.Errorf("tombstone contained object that is not a ReplicaSet %#v", obj))
+			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("tombstone contained object that is not a ReplicaSet %#v", obj), "tombstone contained object that is not a ReplicaSet", "obj", obj)
 			return
 		}
 	}
@@ -377,12 +377,12 @@ func (dc *DeploymentController) deletePod(logger klog.Logger, obj interface{}) {
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleError(fmt.Errorf("couldn't get object from tombstone %#v", obj))
+			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get object from tombstone %#v", obj), "couldn't get object from tombstone", "obj", obj)
 			return
 		}
 		pod, ok = tombstone.Obj.(*v1.Pod)
 		if !ok {
-			utilruntime.HandleError(fmt.Errorf("tombstone contained object that is not a pod %#v", obj))
+			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("tombstone contained object that is not a pod %#v", obj), "tombstone contained object that is not a pod", "obj", obj)
 			return
 		}
 	}
@@ -528,7 +528,7 @@ func (dc *DeploymentController) handleErr(ctx context.Context, err error, key st
 		return
 	}
 
-	utilruntime.HandleErrorWithContext(ctx, err, "sync deployment error", "key", key)
+	utilruntime.HandleErrorWithLogger(logger, err, "sync deployment error", "key", key)
 	logger.V(2).Info("Dropping deployment out of the queue", "deployment", klog.KRef(ns, name), "err", err)
 	dc.queue.Forget(key)
 }
