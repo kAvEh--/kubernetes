@@ -295,10 +295,10 @@ func (c *Controller) Run(ctx context.Context, workers int) {
 	logger.V(2).Info("Starting service queue worker threads", "total", workers)
 	for i := 0; i < workers; i++ {
 		wg.Go(func() {
-			wait.Until(func() { c.serviceQueueWorker(ctx, logger) }, c.workerLoopPeriod, ctx.Done())
+			wait.Until(func() { c.serviceQueueWorker(logger) }, c.workerLoopPeriod, ctx.Done())
 		})
 		wg.Go(func() {
-			wait.Until(func() { c.podQueueWorker(ctx, logger) }, c.workerLoopPeriod, ctx.Done())
+			wait.Until(func() { c.podQueueWorker(logger) }, c.workerLoopPeriod, ctx.Done())
 		})
 	}
 
@@ -313,12 +313,12 @@ func (c *Controller) Run(ctx context.Context, workers int) {
 // them, and marks them done. You may run as many of these in parallel as you
 // wish; the workqueue guarantees that they will not end up processing the same
 // service at the same time
-func (c *Controller) serviceQueueWorker(ctx context.Context, logger klog.Logger) {
-	for c.processNextServiceWorkItem(ctx, logger) {
+func (c *Controller) serviceQueueWorker(logger klog.Logger) {
+	for c.processNextServiceWorkItem(logger) {
 	}
 }
 
-func (c *Controller) processNextServiceWorkItem(ctx context.Context, logger klog.Logger) bool {
+func (c *Controller) processNextServiceWorkItem(logger klog.Logger) bool {
 	cKey, quit := c.serviceQueue.Get()
 	if quit {
 		return false
@@ -326,7 +326,7 @@ func (c *Controller) processNextServiceWorkItem(ctx context.Context, logger klog
 	defer c.serviceQueue.Done(cKey)
 
 	err := c.syncService(logger, cKey)
-	c.handleErr(ctx, logger, err, cKey)
+	c.handleErr(logger, err, cKey)
 
 	return true
 }
@@ -346,7 +346,7 @@ func (c *Controller) processNextTopologyWorkItem(logger klog.Logger) bool {
 	return true
 }
 
-func (c *Controller) handleErr(ctx context.Context, logger klog.Logger, err error, key string) {
+func (c *Controller) handleErr(logger klog.Logger, err error, key string) {
 	trackSync(err)
 
 	if err == nil {
@@ -362,7 +362,7 @@ func (c *Controller) handleErr(ctx context.Context, logger klog.Logger, err erro
 
 	logger.Info("Retry budget exceeded, dropping service out of the queue", "key", key, "err", err)
 	c.serviceQueue.Forget(key)
-	utilruntime.HandleErrorWithContext(ctx, err, "Retry budget exceeded, dropping service out of the queue", "key", key)
+	utilruntime.HandleErrorWithLogger(logger, err, "Retry budget exceeded, dropping service out of the queue", "key", key)
 }
 
 func (c *Controller) syncService(logger klog.Logger, key string) error {
@@ -450,12 +450,12 @@ func (c *Controller) syncService(logger klog.Logger, key string) error {
 	return nil
 }
 
-func (c *Controller) podQueueWorker(ctx context.Context, logger klog.Logger) {
-	for c.processNextPodWorkItem(ctx, logger) {
+func (c *Controller) podQueueWorker(logger klog.Logger) {
+	for c.processNextPodWorkItem(logger) {
 	}
 }
 
-func (c *Controller) processNextPodWorkItem(ctx context.Context, logger klog.Logger) bool {
+func (c *Controller) processNextPodWorkItem(logger klog.Logger) bool {
 	cKey, quit := c.podQueue.Get()
 	if quit {
 		return false
@@ -463,12 +463,12 @@ func (c *Controller) processNextPodWorkItem(ctx context.Context, logger klog.Log
 	defer c.podQueue.Done(cKey)
 
 	err := c.syncPod(logger, cKey)
-	c.handlePodErr(ctx, logger, err, cKey)
+	c.handlePodErr(logger, err, cKey)
 
 	return true
 }
 
-func (c *Controller) handlePodErr(ctx context.Context, logger klog.Logger, err error, key *endpointsliceutil.PodProjectionKey) {
+func (c *Controller) handlePodErr(logger klog.Logger, err error, key *endpointsliceutil.PodProjectionKey) {
 	if err == nil {
 		c.podQueue.Forget(key)
 		return
@@ -482,7 +482,7 @@ func (c *Controller) handlePodErr(ctx context.Context, logger klog.Logger, err e
 
 	logger.Info("Dropping pod out of the queue", "PodProjectionKey", *key)
 	c.podQueue.Forget(key)
-	utilruntime.HandleErrorWithContext(ctx, err, "Dropping pod out of the queue", "PodProjectionKey", *key)
+	utilruntime.HandleErrorWithLogger(logger, err, "Dropping pod out of the queue", "PodProjectionKey", *key)
 }
 
 func (c *Controller) syncPod(logger klog.Logger, key *endpointsliceutil.PodProjectionKey) error {
@@ -555,7 +555,7 @@ func (c *Controller) onEndpointSliceUpdate(logger klog.Logger, prevObj, obj inte
 	prevEndpointSlice := prevObj.(*discovery.EndpointSlice)
 	endpointSlice := obj.(*discovery.EndpointSlice)
 	if endpointSlice == nil || prevEndpointSlice == nil {
-		utilruntime.HandleError(fmt.Errorf("Invalid EndpointSlice provided to onEndpointSliceUpdate()"))
+		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("Invalid EndpointSlice provided to onEndpointSliceUpdate()"), "Invalid EndpointSlice provided to onEndpointSliceUpdate()")
 		return
 	}
 	// EndpointSlice generation does not change when labels change. Although the
