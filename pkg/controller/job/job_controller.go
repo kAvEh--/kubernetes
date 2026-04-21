@@ -530,12 +530,12 @@ func (jm *Controller) deletePod(logger klog.Logger, obj interface{}, final bool)
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get object from tombstone %+v", obj), "failed to retrieve object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "failed to retrieve object from tombstone", "obj", obj)
 			return
 		}
 		pod, ok = tombstone.Obj.(*v1.Pod)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("tombstone contained object that is not a pod %+v", obj), "tombstone contained non-pod object", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "tombstone contained non-pod object", "obj", obj)
 			return
 		}
 	}
@@ -634,12 +634,12 @@ func (jm *Controller) deleteJob(logger klog.Logger, obj interface{}) {
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get object from tombstone %+v", obj), "failed to retrieve object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "failed to retrieve object from tombstone", "obj", obj)
 			return
 		}
 		jobObj, ok = tombstone.Obj.(*batch.Job)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("tombstone contained object that is not a job %+v", obj), "tombstone contained non-job object", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "tombstone contained non-job object", "obj", obj)
 			return
 		}
 	}
@@ -653,7 +653,7 @@ func (jm *Controller) deleteJob(logger klog.Logger, obj interface{}) {
 	key := cache.MetaObjectToName(jobObj).String()
 	err := jm.podBackoffStore.removeBackoffRecord(key)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("error removing backoff record %w", err), "error removing backoff record", "key", key)
+		utilruntime.HandleErrorWithLogger(logger, err, "error removing backoff record", "key", key)
 	}
 }
 
@@ -703,7 +703,7 @@ func (jm *Controller) enqueueSyncJobWithDelay(logger klog.Logger, obj interface{
 func (jm *Controller) enqueueSyncJobInternal(logger klog.Logger, obj interface{}, delay time.Duration) {
 	key, err := controller.KeyFunc(obj)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("Couldn't get key for object %+v: %v", obj, err), "failed to retrieve key for object", "obj", obj)
+		utilruntime.HandleErrorWithLogger(logger, nil, "failed to retrieve key for object", "obj", obj)
 		return
 	}
 
@@ -1613,7 +1613,7 @@ func (jm *Controller) removeTrackingFinalizerFromPods(ctx context.Context, jobKe
 					}
 					if !apierrors.IsNotFound(err) {
 						errCh <- err
-						utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("removing tracking finalizer: %w", err), "error removing tracking finalizer", "pod", pod)
+						utilruntime.HandleErrorWithLogger(logger, err, "error removing tracking finalizer", "pod", pod)
 						return
 					}
 				}
@@ -1778,7 +1778,7 @@ func (jm *Controller) manageJob(ctx context.Context, job *batch.Job, jobCtx *syn
 	parallelism := *job.Spec.Parallelism
 	jobKey, err := controller.KeyFunc(job)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("Couldn't get key for job %#v: %v", job, err), "failed to retrieve key for job", "job", job)
+		utilruntime.HandleErrorWithLogger(logger, err, "failed to retrieve key for job", "job", job)
 		return 0, metrics.JobSyncActionTracking, nil
 	}
 

@@ -216,12 +216,12 @@ func (dc *DeploymentController) deleteDeployment(logger klog.Logger, obj interfa
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get object from tombstone %#v", obj), "couldn't get object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "couldn't get object from tombstone", "obj", obj)
 			return
 		}
 		d, ok = tombstone.Obj.(*apps.Deployment)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("tombstone contained object that is not a Deployment %#v", obj), "tombstone contained object that is not a Deployment", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "tombstone contained object that is not a Deployment", "obj", obj)
 			return
 		}
 	}
@@ -343,12 +343,12 @@ func (dc *DeploymentController) deleteReplicaSet(logger klog.Logger, obj interfa
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get object from tombstone %#v", obj), "couldn't get object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "couldn't get object from tombstone", "obj", obj)
 			return
 		}
 		rs, ok = tombstone.Obj.(*apps.ReplicaSet)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("tombstone contained object that is not a ReplicaSet %#v", obj), "tombstone contained object that is not a ReplicaSet", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "tombstone contained object that is not a ReplicaSet", "obj", obj, "rs", rs)
 			return
 		}
 	}
@@ -377,12 +377,12 @@ func (dc *DeploymentController) deletePod(logger klog.Logger, obj interface{}) {
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get object from tombstone %#v", obj), "couldn't get object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "couldn't get object from tombstone", "obj", obj)
 			return
 		}
 		pod, ok = tombstone.Obj.(*v1.Pod)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("tombstone contained object that is not a pod %#v", obj), "tombstone contained object that is not a pod", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "tombstone contained object that is not a pod", "obj", obj)
 			return
 		}
 	}

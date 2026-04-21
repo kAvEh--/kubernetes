@@ -236,7 +236,7 @@ func (gc *GarbageCollector) Sync(ctx context.Context, discoveryClient discovery.
 		// case, the restMapper will fail to map some of newResources until the next
 		// attempt.
 		if err := gc.resyncMonitors(logger, newResources); err != nil {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("failed to sync resource monitors: %w", err), "resync monitors error")
+			utilruntime.HandleErrorWithLogger(logger, err, "failed to sync resource monitors")
 			metrics.GarbageCollectorResourcesSyncError.Inc()
 			return
 		}
@@ -252,7 +252,7 @@ func (gc *GarbageCollector) Sync(ctx context.Context, discoveryClient discovery.
 		if cacheSynced {
 			logger.V(2).Info("synced garbage collector")
 		} else {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("timed out waiting for dependency graph builder sync during GC sync"), "dependency graph builder sync timeout")
+			utilruntime.HandleErrorWithLogger(logger, nil, "timed out waiting for dependency graph builder sync during GC sync")
 			metrics.GarbageCollectorResourcesSyncError.Inc()
 		}
 
@@ -362,7 +362,7 @@ func (gc *GarbageCollector) attemptToDeleteWorker(ctx context.Context, item inte
 			// For now, log the error and retry.
 			logger.V(5).Info("error syncing item", "item", n.identity, "err", err)
 		} else {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("error syncing item %s: %v", n, err), "error syncing item", "item", n.identity)
+			utilruntime.HandleErrorWithLogger(logger, err, "error syncing item", "item", n)
 		}
 		// retry if garbage collection of an object failed.
 		return requeueItem
@@ -749,7 +749,7 @@ func (gc *GarbageCollector) processAttemptToOrphanWorker(logger klog.Logger) boo
 func (gc *GarbageCollector) attemptToOrphanWorker(logger klog.Logger, item interface{}) workQueueItemAction {
 	owner, ok := item.(*node)
 	if !ok {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("expect *node, got %#v", item), "unexpected type in attemptToOrphanWorker", "item", item)
+		utilruntime.HandleErrorWithLogger(logger, nil, "unexpected type in attemptToOrphanWorker", "item", item)
 		return forgetItem
 	}
 	// we don't need to lock each element, because they never get updated
@@ -762,13 +762,13 @@ func (gc *GarbageCollector) attemptToOrphanWorker(logger klog.Logger, item inter
 
 	err := gc.orphanDependents(logger, owner.identity, dependents)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("orphanDependents for %s failed with %v", owner.identity, err), "orphanDependents failure", "owner", owner.identity)
+		utilruntime.HandleErrorWithLogger(logger, err, "orphanDependents failure", "owner", owner.identity)
 		return requeueItem
 	}
 	// update the owner, remove "orphaningFinalizer" from its finalizers list
 	err = gc.removeFinalizer(logger, owner, metav1.FinalizerOrphanDependents)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("removeOrphanFinalizer for %s failed with %v", owner.identity, err), "removeOrphanFinalizer failure", "owner", owner.identity)
+		utilruntime.HandleErrorWithLogger(logger, err, "removeOrphanFinalizer failure", "owner", owner.identity)
 		return requeueItem
 	}
 	return forgetItem

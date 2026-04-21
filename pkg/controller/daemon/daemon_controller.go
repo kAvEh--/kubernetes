@@ -304,7 +304,7 @@ func (dsc *DaemonSetsController) updateDaemonset(logger klog.Logger, cur, old in
 	if curDS.UID != oldDS.UID {
 		key, err := controller.KeyFunc(oldDS)
 		if err != nil {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get key for object %#v: %v", oldDS, err), "couldn't get key for object", "oldDS", oldDS, "curDS", curDS)
+			utilruntime.HandleErrorWithLogger(logger, err, "couldn't get key for object", "oldDS", oldDS, "curDS", curDS)
 			return
 		}
 		dsc.deleteDaemonset(logger, cache.DeletedFinalStateUnknown{
@@ -322,12 +322,12 @@ func (dsc *DaemonSetsController) deleteDaemonset(logger klog.Logger, obj interfa
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get object from tombstone %#v", obj), "couldn't get object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "couldn't get object from tombstone", "obj", obj)
 			return
 		}
 		ds, ok = tombstone.Obj.(*apps.DaemonSet)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("tombstone contained object that is not a DaemonSet %#v", obj), "tombstone contained object that is not a DaemonSet", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "tombstone contained object that is not a DaemonSet", "obj", obj)
 			return
 		}
 	}
@@ -335,7 +335,7 @@ func (dsc *DaemonSetsController) deleteDaemonset(logger klog.Logger, obj interfa
 
 	key, err := controller.KeyFunc(ds)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get key for object %#v: %v", ds, err), "couldn't get key for object", "ds", ds)
+		utilruntime.HandleErrorWithLogger(logger, err, "couldn't get key for object", "ds", ds)
 		return
 	}
 	dsc.consistencyStore.Clear(
@@ -559,12 +559,12 @@ func (dsc *DaemonSetsController) deleteHistory(logger klog.Logger, obj interface
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("Couldn't get object from tombstone %#v", obj), "Couldn't get object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "Couldn't get object from tombstone", "obj", obj)
 			return
 		}
 		history, ok = tombstone.Obj.(*apps.ControllerRevision)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("Tombstone contained object that is not a ControllerRevision %#v", obj), "Tombstone contained object that is not a ControllerRevision", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "Tombstone contained object that is not a ControllerRevision", "obj", obj)
 			return
 		}
 	}
@@ -696,12 +696,12 @@ func (dsc *DaemonSetsController) deletePod(logger klog.Logger, obj interface{}) 
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get object from tombstone %#v", obj), "couldn't get object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "couldn't get object from tombstone", "obj", obj)
 			return
 		}
 		pod, ok = tombstone.Obj.(*v1.Pod)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("tombstone contained object that is not a pod %#v", obj), "tombstone contained object that is not a pod", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "tombstone contained object that is not a pod", "obj", obj)
 			return
 		}
 	}
@@ -727,7 +727,7 @@ func (dsc *DaemonSetsController) deletePod(logger klog.Logger, obj interface{}) 
 func (dsc *DaemonSetsController) addNode(logger klog.Logger, obj interface{}) {
 	node, ok := obj.(*v1.Node)
 	if !ok {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get node from object %#v", obj), "couldn't get node from object", "obj", obj)
+		utilruntime.HandleErrorWithLogger(logger, nil, "couldn't get node from object", "obj", obj)
 		return
 	}
 

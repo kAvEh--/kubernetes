@@ -555,7 +555,7 @@ func (c *Controller) onEndpointSliceUpdate(logger klog.Logger, prevObj, obj inte
 	prevEndpointSlice := prevObj.(*discovery.EndpointSlice)
 	endpointSlice := obj.(*discovery.EndpointSlice)
 	if endpointSlice == nil || prevEndpointSlice == nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("Invalid EndpointSlice provided to onEndpointSliceUpdate()"), "Invalid EndpointSlice provided to onEndpointSliceUpdate()")
+		utilruntime.HandleErrorWithLogger(logger, nil, "Invalid EndpointSlice provided to onEndpointSliceUpdate()")
 		return
 	}
 	// EndpointSlice generation does not change when labels change. Although the

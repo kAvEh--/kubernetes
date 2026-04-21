@@ -709,7 +709,7 @@ func (gb *GraphBuilder) processGraphChanges(logger klog.Logger) bool {
 	obj := item.obj
 	accessor, err := meta.Accessor(obj)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("cannot access obj: %v", err), "object access denied", "obj", obj)
+		utilruntime.HandleErrorWithLogger(logger, err, "object access denied", "obj", obj)
 		return true
 	}
 

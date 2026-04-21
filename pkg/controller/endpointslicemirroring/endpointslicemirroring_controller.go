@@ -418,7 +418,7 @@ func (c *Controller) onServiceDelete(obj interface{}) {
 func (c *Controller) onEndpointsAdd(logger klog.Logger, obj interface{}) {
 	endpoints := obj.(*v1.Endpoints)
 	if endpoints == nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("onEndpointsAdd() expected type v1.Endpoints, got %T", obj), "v1.Endpoints is null", "obj", obj)
+		utilruntime.HandleErrorWithLogger(logger, nil, "v1.Endpoints is null", "obj", obj)
 		return
 	}
 	if !c.shouldMirror(endpoints) {
@@ -433,7 +433,7 @@ func (c *Controller) onEndpointsUpdate(logger klog.Logger, prevObj, obj interfac
 	endpoints := obj.(*v1.Endpoints)
 	prevEndpoints := prevObj.(*v1.Endpoints)
 	if endpoints == nil || prevEndpoints == nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("onEndpointsUpdate() expected type v1.Endpoints, got %T, %T", prevObj, obj), "prevEndpoints or endpoints is null", "prevObj", prevObj, "obj", obj)
+		utilruntime.HandleErrorWithLogger(logger, nil, "prevEndpoints or endpoints is null", "prevObj", prevObj, "obj", obj)
 		return
 	}
 	if !c.shouldMirror(endpoints) && !c.shouldMirror(prevEndpoints) {
@@ -447,7 +447,7 @@ func (c *Controller) onEndpointsUpdate(logger klog.Logger, prevObj, obj interfac
 func (c *Controller) onEndpointsDelete(logger klog.Logger, obj interface{}) {
 	endpoints := getEndpointsFromDeleteAction(obj)
 	if endpoints == nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("onEndpointsDelete() expected type v1.Endpoints, got %T", obj), "endpoints is null", "obj", obj)
+		utilruntime.HandleErrorWithLogger(logger, nil, "endpoints is null", "obj", obj)
 		return
 	}
 	if !c.shouldMirror(endpoints) {
@@ -479,7 +479,7 @@ func (c *Controller) onEndpointSliceUpdate(logger klog.Logger, prevObj, obj inte
 	endpointSlice := obj.(*discovery.EndpointSlice)
 	prevEndpointSlice := prevObj.(*discovery.EndpointSlice)
 	if endpointSlice == nil || prevEndpointSlice == nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("onEndpointSliceUpdated() expected type discovery.EndpointSlice, got %T, %T", prevObj, obj), "prevEndpointSlice or endpointSlice is null", "prevObj", prevObj, "obj", obj)
+		utilruntime.HandleErrorWithLogger(logger, nil, "prevEndpointSlice or endpointSlice is null", "prevObj", prevObj, "obj", obj)
 		return
 	}
 	// EndpointSlice generation does not change when labels change. Although the
