@@ -980,7 +980,7 @@ func (s *Server) getAttach(request *restful.Request, response *restful.Response)
 	params := getExecRequestParams(request)
 	streamOpts, err := remotecommandserver.NewOptions(request.Request)
 	if err != nil {
-		utilruntime.HandleErrorWithContext(request.Request.Context(), err, "new options error")
+		utilruntime.HandleError(err)
 		response.WriteError(http.StatusBadRequest, err)
 		return
 	}
@@ -1017,7 +1017,7 @@ func (s *Server) getExec(request *restful.Request, response *restful.Response) {
 	params := getExecRequestParams(request)
 	streamOpts, err := remotecommandserver.NewOptions(request.Request)
 	if err != nil {
-		utilruntime.HandleErrorWithContext(request.Request.Context(), err, "new options error")
+		utilruntime.HandleError(err)
 		response.WriteError(http.StatusBadRequest, err)
 		return
 	}
@@ -1096,7 +1096,7 @@ func (s *Server) getPortForward(request *restful.Request, response *restful.Resp
 	} else {
 		portForwardOptions, err = portforward.NewV4Options(request.Request)
 		if err != nil {
-			utilruntime.HandleErrorWithContext(request.Request.Context(), err, "new options error")
+			utilruntime.HandleError(err)
 			response.WriteError(http.StatusBadRequest, err) //nolint:errcheck
 			return
 		}
