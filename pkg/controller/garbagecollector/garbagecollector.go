@@ -322,7 +322,7 @@ const (
 func (gc *GarbageCollector) attemptToDeleteWorker(ctx context.Context, item interface{}) workQueueItemAction {
 	n, ok := item.(*node)
 	if !ok {
-		utilruntime.HandleErrorWithContext(ctx, fmt.Errorf("expect *node, got %#v", item), "unexpected type in attemptToDeleteWorker", "item", item)
+		utilruntime.HandleErrorWithContext(ctx, nil, "unexpected item type", "item", item)
 		return forgetItem
 	}
 

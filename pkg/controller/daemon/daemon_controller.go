@@ -408,7 +408,7 @@ func (dsc *DaemonSetsController) processNextWorkItem(ctx context.Context) bool {
 		return true
 	}
 
-	utilruntime.HandleErrorWithContext(ctx, fmt.Errorf("%v failed with : %v", dsKey, err), "sync daemon set error", "key", dsKey)
+	utilruntime.HandleErrorWithContext(ctx, err, "sync daemon set error", "key", dsKey)
 	dsc.queue.AddRateLimited(dsKey)
 
 	return true
@@ -1491,7 +1491,7 @@ func (dsc *DaemonSetsController) processNextNodeUpdate(ctx context.Context) bool
 		return true
 	}
 
-	utilruntime.HandleErrorWithContext(ctx, fmt.Errorf("%v failed with : %w", nodeName, err), "Failed node update", "nodeName", nodeName)
+	utilruntime.HandleErrorWithContext(ctx, err, "failure in node update", "nodeName", nodeName)
 	dsc.nodeUpdateQueue.AddRateLimited(nodeName)
 
 	return true

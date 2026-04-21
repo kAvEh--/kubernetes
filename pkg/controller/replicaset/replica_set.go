@@ -308,7 +308,7 @@ func (rsc *ReplicaSetController) Run(ctx context.Context, workers int) {
 func (rsc *ReplicaSetController) getReplicaSetsWithSameController(logger klog.Logger, rs *apps.ReplicaSet) []*apps.ReplicaSet {
 	controllerRef := metav1.GetControllerOf(rs)
 	if controllerRef == nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("ReplicaSet has no controller: %v", rs), "ReplicaSet has no controller", "rs", rs)
+		utilruntime.HandleErrorWithLogger(logger, nil, "ReplicaSet has no controller", "rs", rs)
 		return nil
 	}
 
@@ -399,7 +399,7 @@ func (rsc *ReplicaSetController) updateRS(logger klog.Logger, old, cur interface
 	if curRS.UID != oldRS.UID {
 		key, err := controller.KeyFunc(oldRS)
 		if err != nil {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get key for object %#v: %v", oldRS, err), "failed to retrieve key for object", "oldRS", oldRS, "curRS", curRS)
+			utilruntime.HandleErrorWithLogger(logger, err, "failed to retrieve key for object", "oldRS", oldRS, "curRS", curRS)
 			return
 		}
 		rsc.deleteRS(logger, cache.DeletedFinalStateUnknown{
@@ -431,19 +431,19 @@ func (rsc *ReplicaSetController) deleteRS(logger klog.Logger, obj interface{}) {
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get object from tombstone %#v", obj), "failed to retrieve object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "failed to retrieve object from tombstone", "obj", obj)
 			return
 		}
 		rs, ok = tombstone.Obj.(*apps.ReplicaSet)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("tombstone contained object that is not a ReplicaSet %#v", obj), "tombstone contained object that is not a ReplicaSet", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "tombstone contained object that is not a ReplicaSet", "obj", obj)
 			return
 		}
 	}
 
 	key, err := controller.KeyFunc(rs)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get key for object %#v: %v", rs, err), "failed to retrieve key for object", "rs", rs)
+		utilruntime.HandleErrorWithLogger(logger, err, "failed to retrieve key for object", "rs", rs)
 		return
 	}
 
@@ -588,12 +588,12 @@ func (rsc *ReplicaSetController) deletePod(logger klog.Logger, obj interface{}) 
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get object from tombstone %+v", obj), "failed to retrieve object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "failed to retrieve object from tombstone", "obj", obj)
 			return
 		}
 		pod, ok = tombstone.Obj.(*v1.Pod)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("tombstone contained object that is not a pod %#v", obj), "tombstone contained object that is not a pod", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "tombstone contained object that is not a pod", "obj", obj)
 			return
 		}
 	}
@@ -609,7 +609,7 @@ func (rsc *ReplicaSetController) deletePod(logger klog.Logger, obj interface{}) 
 	}
 	rsKey, err := controller.KeyFunc(rs)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get key for object %#v: %v", rs, err), "failed to retrieve key for object", "rs", rs)
+		utilruntime.HandleErrorWithLogger(logger, err, "failed to retrieve key for object", "rs", rs)
 		return
 	}
 	logger.V(4).Info("Pod deleted", "delete_by", utilruntime.GetCaller(), "deletion_timestamp", pod.DeletionTimestamp, "pod", klog.KObj(pod))
@@ -637,7 +637,7 @@ func (rsc *ReplicaSetController) processNextWorkItem(ctx context.Context) bool {
 		return true
 	}
 
-	utilruntime.HandleErrorWithContext(ctx, fmt.Errorf("sync %q failed with %v", key, err), "sync replica set error", "key", key)
+	utilruntime.HandleErrorWithContext(ctx, err, "sync replica set error", "key", key)
 	rsc.queue.AddRateLimited(key)
 
 	return true
@@ -651,7 +651,7 @@ func (rsc *ReplicaSetController) manageReplicas(ctx context.Context, activePods 
 	rsKey, err := controller.KeyFunc(rs)
 	logger := klog.FromContext(ctx)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("couldn't get key for %v %#v: %v", rsc.Kind, rs, err), "failed to retrieve key for replica set", "rs", rs)
+		utilruntime.HandleErrorWithLogger(logger, err, "failed to retrieve key for replica set", "kind", rsc.Kind, "rs", rs)
 		return nil
 	}
 	if diff < 0 {
@@ -789,7 +789,7 @@ func (rsc *ReplicaSetController) syncReplicaSet(ctx context.Context, key string)
 	rsNeedsSync := rsc.expectations.SatisfiedExpectations(logger, key)
 	selector, err := metav1.LabelSelectorAsSelector(rs.Spec.Selector)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, fmt.Errorf("error converting pod selector to selector for rs %v/%v: %v", namespace, name, err), "failed to convert pod selector to selector", "namespace", namespace, "name", name)
+		utilruntime.HandleErrorWithLogger(logger, err, "failed to convert pod selector to selector", "namespace", namespace, "name", name)
 		return nil
 	}
 
