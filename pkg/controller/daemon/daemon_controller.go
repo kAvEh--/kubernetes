@@ -1097,7 +1097,7 @@ func (dsc *DaemonSetsController) syncNodes(ctx context.Context, ds *apps.DaemonS
 					logger.V(2).Info("Failed creation, decrementing expectations for daemon set", "daemonset", klog.KObj(ds))
 					dsc.expectations.CreationObserved(logger, dsKey)
 					errCh <- err
-					utilruntime.HandleErrorWithLogger(logger, err, "Failed creation, decrementing expectations for daemon set", "daemonset", klog.KObj(ds))
+					utilruntime.HandleErrorWithLogger(logger, err, "Delivered failed create error to error channel after decrementing expectations", "daemonset", klog.KObj(ds))
 				}
 			}(i)
 		}

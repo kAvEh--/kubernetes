@@ -282,7 +282,7 @@ func (c *Controller) handleErr(logger klog.Logger, err error, key string) {
 
 	logger.Info("Retry budget exceeded, dropping Endpoints out of the queue", "key", key, "err", err)
 	c.queue.Forget(key)
-	utilruntime.HandleErrorWithLogger(logger, err, "Retry budget exceeded, dropping Endpoints out of the queue", "key", key)
+	utilruntime.HandleErrorWithLogger(logger, err, "Reported exhausted-retry error for EndpointSlice mirroring", "key", key)
 }
 
 func (c *Controller) syncEndpoints(ctx context.Context, key string) error {
