@@ -304,7 +304,7 @@ func (dsc *DaemonSetsController) updateDaemonset(logger klog.Logger, cur, old in
 	if curDS.UID != oldDS.UID {
 		key, err := controller.KeyFunc(oldDS)
 		if err != nil {
-			utilruntime.HandleErrorWithLogger(logger, err, "couldn't get key for object", "oldDS", oldDS, "curDS", curDS)
+			utilruntime.HandleErrorWithLogger(logger, err, "failed to get key for object", "oldDS", oldDS, "curDS", curDS)
 			return
 		}
 		dsc.deleteDaemonset(logger, cache.DeletedFinalStateUnknown{
@@ -322,7 +322,7 @@ func (dsc *DaemonSetsController) deleteDaemonset(logger klog.Logger, obj interfa
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, nil, "couldn't get object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "failed to get object from tombstone", "obj", obj)
 			return
 		}
 		ds, ok = tombstone.Obj.(*apps.DaemonSet)
@@ -335,7 +335,7 @@ func (dsc *DaemonSetsController) deleteDaemonset(logger klog.Logger, obj interfa
 
 	key, err := controller.KeyFunc(ds)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, err, "couldn't get key for object", "ds", ds)
+		utilruntime.HandleErrorWithLogger(logger, err, "failed to get key for object", "ds", ds)
 		return
 	}
 	dsc.consistencyStore.Clear(
@@ -559,12 +559,12 @@ func (dsc *DaemonSetsController) deleteHistory(logger klog.Logger, obj interface
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, nil, "Couldn't get object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "failed to get object from tombstone", "obj", obj)
 			return
 		}
 		history, ok = tombstone.Obj.(*apps.ControllerRevision)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, nil, "Tombstone contained object that is not a ControllerRevision", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "tombstone contained object that is not a ControllerRevision", "obj", obj)
 			return
 		}
 	}
@@ -696,7 +696,7 @@ func (dsc *DaemonSetsController) deletePod(logger klog.Logger, obj interface{}) 
 	if !ok {
 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			utilruntime.HandleErrorWithLogger(logger, nil, "couldn't get object from tombstone", "obj", obj)
+			utilruntime.HandleErrorWithLogger(logger, nil, "failed to get object from tombstone", "obj", obj)
 			return
 		}
 		pod, ok = tombstone.Obj.(*v1.Pod)
@@ -727,7 +727,7 @@ func (dsc *DaemonSetsController) deletePod(logger klog.Logger, obj interface{}) 
 func (dsc *DaemonSetsController) addNode(logger klog.Logger, obj interface{}) {
 	node, ok := obj.(*v1.Node)
 	if !ok {
-		utilruntime.HandleErrorWithLogger(logger, nil, "couldn't get node from object", "obj", obj)
+		utilruntime.HandleErrorWithLogger(logger, nil, "failed to get node from object", "obj", obj)
 		return
 	}
 
@@ -1096,7 +1096,7 @@ func (dsc *DaemonSetsController) syncNodes(ctx context.Context, ds *apps.DaemonS
 				if err != nil {
 					dsc.expectations.CreationObserved(logger, dsKey)
 					errCh <- err
-					utilruntime.HandleErrorWithLogger(logger, err, "Failed to create daemonset pod, decremented expectations", "daemonset", klog.KObj(ds))
+					utilruntime.HandleErrorWithLogger(logger, err, "failed to create daemonset pod, decremented expectations", "daemonset", klog.KObj(ds))
 				}
 			}(i)
 		}
@@ -1122,7 +1122,7 @@ func (dsc *DaemonSetsController) syncNodes(ctx context.Context, ds *apps.DaemonS
 				dsc.expectations.DeletionObserved(logger, dsKey)
 				if !apierrors.IsNotFound(err) {
 					errCh <- err
-					utilruntime.HandleErrorWithLogger(logger, err, "Failed to delete deamonset pod, decremented expectations", "daemonset", klog.KObj(ds), "podsToDelete", podsToDelete[ix])
+					utilruntime.HandleErrorWithLogger(logger, err, "failed to delete deamonset pod, decremented expectations", "daemonset", klog.KObj(ds), "podsToDelete", podsToDelete[ix])
 				}
 			}
 		}(i)
@@ -1489,7 +1489,7 @@ func (dsc *DaemonSetsController) processNextNodeUpdate(ctx context.Context) bool
 		return true
 	}
 
-	utilruntime.HandleErrorWithContext(ctx, err, "failure in node update", "nodeName", nodeName)
+	utilruntime.HandleErrorWithContext(ctx, err, "failed to update node", "nodeName", nodeName)
 	dsc.nodeUpdateQueue.AddRateLimited(nodeName)
 
 	return true
