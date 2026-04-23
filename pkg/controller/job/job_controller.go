@@ -1289,10 +1289,9 @@ func (jm *Controller) deleteJobPods(ctx context.Context, job *batch.Job, jobKey 
 		// Decrement the expected number of deletes because the informer won't observe this deletion
 		jm.expectations.DeletionObserved(logger, jobKey)
 		if !apierrors.IsNotFound(err) {
-			logger.V(2).Info("Failed to delete Pod", "job", klog.KObj(job), "pod", klog.KObj(pod), "err", err)
 			atomic.AddInt32(&successfulDeletes, -1)
 			errCh <- err
-			utilruntime.HandleErrorWithLogger(logger, err, "error deleting pod", "pod", pod)
+			utilruntime.HandleErrorWithLogger(logger, err, "error deleting pod", "job", klog.KObj(job), "pod", klog.KObj(pod))
 		}
 	}
 
@@ -1778,7 +1777,7 @@ func (jm *Controller) manageJob(ctx context.Context, job *batch.Job, jobCtx *syn
 	parallelism := *job.Spec.Parallelism
 	jobKey, err := controller.KeyFunc(job)
 	if err != nil {
-		utilruntime.HandleErrorWithLogger(logger, err, "failed to retrieve key for job", "job", job)
+		utilruntime.HandleErrorWithLogger(logger, err, "failed to retrieve key for job", "job", job, "jobKey", jobKey)
 		return 0, metrics.JobSyncActionTracking, nil
 	}
 
@@ -1950,9 +1949,8 @@ func (jm *Controller) manageJob(ctx context.Context, job *batch.Job, jobCtx *syn
 						}
 					}
 					if err != nil {
-						defer utilruntime.HandleErrorWithLogger(logger, err, "error creating pod", "job", job, "generateName", generateName)
+						defer utilruntime.HandleErrorWithLogger(logger, err, "error creating pod", "job", klog.KObj(job), "generateName", generateName)
 						// Decrement the expected number of creates because the informer won't observe this pod
-						logger.V(2).Info("Failed creation, decrementing expectations", "job", klog.KObj(job))
 						jm.expectations.CreationObserved(logger, jobKey)
 						atomic.AddInt32(&active, -1)
 						errCh <- err
