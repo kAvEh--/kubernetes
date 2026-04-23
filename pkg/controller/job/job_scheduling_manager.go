@@ -140,7 +140,7 @@ func (jm *Controller) getOrCreateWorkload(ctx context.Context, job *batch.Job, p
 			result, err = jm.validateWorkloadStructure(logger, job, wl)
 			return err
 		default:
-			utilruntime.HandleErrorWithLogger(logger, nil, "multiple Workloads referencing Job falling back to default scheduling", "workloadsCount", len(matched), "job", job.Name, "namespace", job.Namespace)
+			utilruntime.HandleErrorWithLogger(logger, nil, "multiple Workloads referencing Job falling back to default scheduling", "workloadsCount", len(matched), "job", job, "jobName", job.Name, "namespace", job.Namespace)
 			return nil
 		}
 	})
@@ -198,7 +198,7 @@ func (jm *Controller) getOrCreatePodGroup(ctx context.Context, job *batch.Job, w
 			result = pg
 			return nil
 		default:
-			utilruntime.HandleErrorWithLogger(logger, nil, "multiple PodGroups referencing Workload falling back to default scheduling", "PodGroupsCount", len(matched), "workload", workload.Name, "namespace", workload.Namespace)
+			utilruntime.HandleErrorWithLogger(logger, nil, "multiple PodGroups referencing Workload falling back to default scheduling", "PodGroupsCount", len(matched), "workload", workload, "workloadName", workload.Name, "namespace", workload.Namespace)
 			return nil
 		}
 	})
