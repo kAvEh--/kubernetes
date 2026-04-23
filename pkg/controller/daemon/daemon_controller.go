@@ -1094,10 +1094,9 @@ func (dsc *DaemonSetsController) syncNodes(ctx context.Context, ds *apps.DaemonS
 					}
 				}
 				if err != nil {
-					logger.V(2).Info("Failed creation, decrementing expectations for daemon set", "daemonset", klog.KObj(ds))
 					dsc.expectations.CreationObserved(logger, dsKey)
 					errCh <- err
-					utilruntime.HandleErrorWithLogger(logger, err, "Delivered failed create error to error channel after decrementing expectations", "daemonset", klog.KObj(ds))
+					utilruntime.HandleErrorWithLogger(logger, err, "Failed to create daemonset pod, decremented expectations", "daemonset", klog.KObj(ds))
 				}
 			}(i)
 		}
@@ -1122,9 +1121,8 @@ func (dsc *DaemonSetsController) syncNodes(ctx context.Context, ds *apps.DaemonS
 			if err := dsc.podControl.DeletePod(ctx, ds.Namespace, podsToDelete[ix], ds); err != nil {
 				dsc.expectations.DeletionObserved(logger, dsKey)
 				if !apierrors.IsNotFound(err) {
-					logger.V(2).Info("Failed deletion, decremented expectations for daemon set", "daemonset", klog.KObj(ds))
 					errCh <- err
-					utilruntime.HandleErrorWithLogger(logger, err, "Failed deletion, decremented expectations for daemon set", "daemonset", klog.KObj(ds))
+					utilruntime.HandleErrorWithLogger(logger, err, "Failed to delete deamonset pod, decremented expectations", "daemonset", klog.KObj(ds), "podsToDelete", podsToDelete[ix])
 				}
 			}
 		}(i)
