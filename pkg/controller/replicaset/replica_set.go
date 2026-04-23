@@ -704,7 +704,9 @@ func (rsc *ReplicaSetController) manageReplicas(ctx context.Context, activePods 
 		logger.V(2).Info("Too many replicas", "replicaSet", klog.KObj(rs), "need", *(rs.Spec.Replicas), "deleting", diff)
 
 		relatedPods, err := rsc.getIndirectlyRelatedPods(logger, rs)
-		utilruntime.HandleErrorWithLogger(logger, err, "failed to retrieve indirectly related pods", "rs", rs)
+		if err != nil {
+			utilruntime.HandleErrorWithLogger(logger, err, "failed to retrieve indirectly related pods", "rs", rs)
+		}
 
 		// Choose which Pods to delete, preferring those in earlier phases of startup.
 		podsToDelete := getPodsToDelete(activePods, relatedPods, diff)
