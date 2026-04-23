@@ -360,7 +360,6 @@ func (c *Controller) handleErr(logger klog.Logger, err error, key string) {
 		return
 	}
 
-	logger.Info("Retry budget exceeded, dropping service out of the queue", "key", key, "err", err)
 	c.serviceQueue.Forget(key)
 	utilruntime.HandleErrorWithLogger(logger, err, "Retry budget exceeded, dropping service out of the queue", "key", key)
 }
@@ -480,7 +479,6 @@ func (c *Controller) handlePodErr(logger klog.Logger, err error, key *endpointsl
 		return
 	}
 
-	logger.Info("Dropping pod out of the queue", "PodProjectionKey", *key)
 	c.podQueue.Forget(key)
 	utilruntime.HandleErrorWithLogger(logger, err, "Dropping pod out of the queue", "PodProjectionKey", *key)
 }
