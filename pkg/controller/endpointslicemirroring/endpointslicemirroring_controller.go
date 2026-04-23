@@ -275,12 +275,11 @@ func (c *Controller) handleErr(logger klog.Logger, err error, key string) {
 	}
 
 	if c.queue.NumRequeues(key) < maxRetries {
-		logger.Info("Error mirroring EndpointSlices for Endpoints, retrying", "key", key, "err", err)
+		utilruntime.HandleErrorWithLogger(logger, err, "Error mirroring EndpointSlices for Endpoints, retrying", "key", key)
 		c.queue.AddRateLimited(key)
 		return
 	}
 
-	logger.Info("Retry budget exceeded, dropping Endpoints out of the queue", "key", key, "err", err)
 	c.queue.Forget(key)
 	utilruntime.HandleErrorWithLogger(logger, err, "Reported exhausted-retry error for EndpointSlice mirroring", "key", key)
 }
