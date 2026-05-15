@@ -1490,7 +1490,7 @@ type testPodAdmitHandler struct {
 }
 
 // Admit rejects all pods in the podsToReject list with a matching UID.
-func (a *testPodAdmitHandler) Admit(attrs *lifecycle.PodAdmitAttributes) lifecycle.PodAdmitResult {
+func (a *testPodAdmitHandler) Admit(_ context.Context, attrs *lifecycle.PodAdmitAttributes) lifecycle.PodAdmitResult {
 	if a.admitFunc == nil {
 		return lifecycle.PodAdmitResult{Admit: true}
 	}
@@ -2354,7 +2354,7 @@ func TestRecordPodDeferredAcceptedResizes(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			logger, _ := ktesting.NewTestContext(t)
+			tCtx := ktesting.Init(t)
 			original := &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					UID:       "1111",
@@ -2397,7 +2397,7 @@ func TestRecordPodDeferredAcceptedResizes(t *testing.T) {
 				return resizedPod, true
 			}
 			am.PushPendingResize(original.UID)
-			resizedPods := am.(*manager).retryPendingResizes(logger, tc.trigger)
+			resizedPods := am.(*manager).retryPendingResizes(tCtx, tc.trigger)
 
 			require.Len(t, resizedPods, 1)
 			require.Equal(t, original.UID, resizedPods[0].UID)

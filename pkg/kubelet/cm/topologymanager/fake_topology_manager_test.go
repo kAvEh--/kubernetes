@@ -87,6 +87,7 @@ func TestFakeRemoveContainer(t *testing.T) {
 }
 
 func TestFakeAdmit(t *testing.T) {
+	tCtx := ktesting.Init(t)
 	tcases := []struct {
 		name     string
 		result   lifecycle.PodAdmitResult
@@ -118,7 +119,7 @@ func TestFakeAdmit(t *testing.T) {
 		pod := v1.Pod{}
 		pod.Status.QOSClass = tc.qosClass
 		podAttr.Pod = &pod
-		actual := fm.Admit(&podAttr)
+		actual := fm.Admit(tCtx, &podAttr)
 		if reflect.DeepEqual(actual, tc.result) {
 			t.Errorf("Error occurred, expected Admit in result to be %v got %v", tc.result, actual.Admit)
 		}
