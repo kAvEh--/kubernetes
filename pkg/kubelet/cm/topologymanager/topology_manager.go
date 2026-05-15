@@ -90,7 +90,7 @@ type Manager interface {
 	// AddContainer adds pod to Manager for tracking
 	AddContainer(pod *v1.Pod, container *v1.Container, containerID string)
 	// RemoveContainer removes pod from Manager tracking
-	RemoveContainer(containerID string) error
+	RemoveContainer(logger klog.Logger, containerID string) error
 	// Store is the interface for storing pod topology hints
 	Store
 }
@@ -255,8 +255,8 @@ func (m *manager) AddContainer(pod *v1.Pod, container *v1.Container, containerID
 	m.scope.AddContainer(pod, container, containerID)
 }
 
-func (m *manager) RemoveContainer(containerID string) error {
-	return m.scope.RemoveContainer(containerID)
+func (m *manager) RemoveContainer(logger klog.Logger, containerID string) error {
+	return m.scope.RemoveContainer(logger, containerID)
 }
 
 func (m *manager) Admit(attrs *lifecycle.PodAdmitAttributes) lifecycle.PodAdmitResult {

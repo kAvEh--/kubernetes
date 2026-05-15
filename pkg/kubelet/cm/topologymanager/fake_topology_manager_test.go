@@ -22,6 +22,7 @@ import (
 
 	"k8s.io/api/core/v1"
 	"k8s.io/kubernetes/pkg/kubelet/lifecycle"
+	"k8s.io/kubernetes/test/utils/ktesting"
 )
 
 func TestNewFakeManager(t *testing.T) {
@@ -57,6 +58,7 @@ func TestFakeGetAffinity(t *testing.T) {
 }
 
 func TestFakeRemoveContainer(t *testing.T) {
+	logger, _ := ktesting.NewTestContext(t)
 	testCases := []struct {
 		name        string
 		containerID string
@@ -75,7 +77,7 @@ func TestFakeRemoveContainer(t *testing.T) {
 	}
 	fm := fakeManager{}
 	for _, tc := range testCases {
-		err := fm.RemoveContainer(tc.containerID)
+		err := fm.RemoveContainer(logger, tc.containerID)
 		if err != nil {
 			t.Errorf("Expected error to be nil but got: %v", err)
 		}
